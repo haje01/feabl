@@ -1,0 +1,123 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "cluster",
+    "description": "Featr schema for cluster",
+    "definitions": {
+        "dataSourceType": {
+            "type": "object",
+            "description": "Data source config",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Data source name"
+                }
+            },
+            "oneOf": [
+                {
+                    "properties": {
+                        "type": {
+                            "const": "Athena"
+                        },
+                        "staging_s3": {
+                            "type": "string",
+                            "format": "uri",
+                            "pattern": "^s3://.+"
+                        }
+                    }
+                },
+                {
+                    "properties": {
+                        "type": {
+                            "const": "MySql"
+                        }
+                    }
+                }
+            ]
+        },
+        "codeType": {
+            "description": "Code config",
+            "additionalProperties": false,
+            "properties": {
+                "base_dir": {
+                    "type": "string",
+                    "description": "Code base directory"
+                },
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "description": "Code file name with extension"
+                            },
+                            {
+                                "type": "array",
+                                "minItems": 2,
+                                "maxItems": 2,
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "nodeType": {
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "depends": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "nodesType": {
+            "type": "array",
+            "description": "Nodes for feature generation",
+            "items": {
+                "$ref": "#/definitions/nodeType"
+            }
+        },
+        "cycleType": {
+            "description": "Cyclic feature config",
+            "additionalProperties": false,
+            "properties": {
+                "period": {
+                    "type": "integer"
+                },
+                "nodes": {
+                    "$ref": "#/definitions/nodesType"
+                }
+            }
+        }
+    },
+    "additionalProperties": false,
+    "properties": {
+        "$schema": {
+            "type": "string",
+            "description": "Schema URI"
+        },
+        "description": {
+            "description": "Describe profile usage",
+            "type": "string"
+        },
+        "data_source": {
+                "$ref": "#/definitions/dataSourceType"
+        },
+        "code": {
+            "$ref": "#/definitions/codeType"
+        },
+        "cyclic": {
+            "$ref": "#/definitions/cycleType"
+        },
+        "once": {
+            "$ref": "#/definitions/nodesType"
+        }
+    }
+}
